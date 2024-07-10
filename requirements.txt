@@ -3,3 +3,4 @@ streamlit-webrtc==0.47.7
 tornado==6.1
 protobuf==3.20.1
 streamlit-server-state==0.17.1
+opencv-python
