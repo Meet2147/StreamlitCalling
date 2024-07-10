@@ -1,20 +1,24 @@
+import streamlit as st
 from streamlit_server_state import server_state, server_state_lock
-from streamlit_webrtc import ClientSettings, WebRtcMode, webrtc_streamer
-
+from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
 
 def main():
     if "webrtc_contexts" not in server_state:
         server_state["webrtc_contexts"] = []
 
+    RTC_CONFIGURATION = RTCConfiguration(
+        {
+            "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+        }
+    )
+
+    MEDIA_STREAM_CONSTRAINTS = {"video": True, "audio": True}
+
     self_ctx = webrtc_streamer(
         key="self",
         mode=WebRtcMode.SENDRECV,
-        client_settings=ClientSettings(
-            rtc_configuration={
-                "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-            },
-            media_stream_constraints={"video": True, "audio": True},
-        ),
+        rtc_configuration=RTC_CONFIGURATION,
+        media_stream_constraints=MEDIA_STREAM_CONSTRAINTS,
         sendback_audio=False,
     )
 
@@ -35,20 +39,12 @@ def main():
         webrtc_streamer(
             key=str(id(ctx)),
             mode=WebRtcMode.RECVONLY,
-            client_settings=ClientSettings(
-                rtc_configuration={
-                    "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-                },
-                media_stream_constraints={
-                    "video": True,
-                    "audio": True,
-                },
-            ),
+            rtc_configuration=RTC_CONFIGURATION,
+            media_stream_constraints=MEDIA_STREAM_CONSTRAINTS,
             source_audio_track=ctx.output_audio_track,
             source_video_track=ctx.output_video_track,
             desired_playing_state=ctx.state.playing,
         )
-
 
 if __name__ == "__main__":
     main()
